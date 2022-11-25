@@ -13,6 +13,9 @@ class StockData(Resource):
         self._stockService = kwargs['stockService']
         super().__init__()
 
-    def get(self, symbol: str):
-        data = self._stockService.getStockData(symbol)
+    def get(self, symbol: str, type: str):
+        withPrediction = False
+        if type == "full":
+            withPrediction = True
+        data = self._stockService.getStockData(symbol, withPrediction)
         return json.dumps(data)

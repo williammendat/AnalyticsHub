@@ -17,6 +17,7 @@ class StockService:
     _client: Database
     _stocksRepository: Collection
     _stockInfosRepository: Collection
+    _stockPercentRepository: Collection
     _syncTaskRepository: Collection
     _syncLogsRepository: Collection
     _stockModelRepository: Collection
@@ -27,6 +28,7 @@ class StockService:
                  client: Database,
                  stocksRepository: Collection,
                  stockInfosRepository: Collection,
+                 stockPercentRepository: Collection,
                  syncTaskRepository: Collection,
                  syncLogsRepository: Collection,
                  stockModelRepository: Collection) -> None:
@@ -37,6 +39,7 @@ class StockService:
         self._client = client
         self._stocksRepository = stocksRepository
         self._stockInfosRepository = stockInfosRepository
+        self._stockPercentRepository = stockPercentRepository
         self._syncTaskRepository = syncTaskRepository
         self._syncLogsRepository = syncLogsRepository
         self._stockModelRepository = stockModelRepository
@@ -222,6 +225,18 @@ class StockService:
         if len(hist) == 0:
             return
 
+        hist["NewDate"] = pd.to_datetime(hist['DateString'])
+        date_series = pd.Series([result_string])
+        date_series = pd.to_datetime(date_series)
+        date = date_series[0]
+
+        hist = hist[hist["NewDate"] >= date]
+
+        if len(hist) == 0:
+            return
+
+        hist = hist.drop(['NewDate'], axis=1)
+    
         repo.insert_many(hist.to_dict('records'))
 
     def syncHistory(self):
@@ -263,11 +278,59 @@ class StockService:
             else:
                 self.syncFullHistory(stock)
 
+        self.syncStockPercentage()
+
         # Status 2 (Finished)
         self.updateTaskAndLog(syncTaskId, 2, f"Success")
 
-    def getStockData(self, symbol: str) -> dict:
+    def takePercent(self, elem: dict):
+        if "percent" in elem:
+            return elem["percent"]
+        return 0
+
+    def syncStockPercentage(self):
+        print("Sync Stock Percentage started")
+        stocks = list(self._stocksRepository.find({}))
+
+        stockList = list()
+
+        for stock in stocks:
+            symbol = stock["symbol"]
+            percent = self.getStockDailyPercentageFromSymbol(symbol)
+            data = {
+                "_id": bson.ObjectId(), 
+                "symbol": symbol, 
+                "percent": percent
+            }
+            stockList.append(data)
+        stockList.sort(key=self.takePercent)
+        self._stockPercentRepository.delete_many({})
+        self._stockPercentRepository.insert_many(stockList)
+
+
+    def getStockDailyPercentageFromSymbol(self, symbol: str):
+        try:
+            print(f'Daily Percent for {symbol}')
+            collection = self._histCollectPrefix + symbol
+            repo = self._client[collection]
+            last_two = list(repo.find(sort=[('Date', -1)]).limit(2))
+            print(last_two)
+            if len(last_two) < 2:
+                return 0
+            current = last_two[0]["Close"]
+            previous = last_two[1]["Close"]
+            diff = round(current - previous, 2)
+            percent = round((diff / previous) * 100, 2)    
+            return percent
+        except Exception as e:
+            print(e)
+            return 0
+
+    def getStockData(self, symbol: str, withPrediction: bool) -> dict:
         data = self._yFinanceService.GetFinancialData(symbol)
+
+        if not withPrediction:
+            return data
 
         model_filter = {"symbol": symbol}
 

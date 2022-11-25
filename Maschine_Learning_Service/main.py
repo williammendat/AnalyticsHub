@@ -19,7 +19,7 @@ def limit_remote_addr():
 
 container = create_container()
 
-api.add_resource(StockData, "/stockData/<string:symbol>",
+api.add_resource(StockData, "/stockData/<string:symbol>/<string:type>",
                  resource_class_kwargs={'stockService': container["stockService"]})
 
 api.add_resource(YFinanceData, "/stockHist/<string:symbol>/<string:period>/<string:interval>",

@@ -19,6 +19,7 @@ def create_container() -> dict:
     database = createDatabase(MongoDbUri, MongoDbName)
     stocksRepository = database["stocks"]
     stockInfosRepository = database["stockInfos"]
+    stockPercentRepository = database["stockPercent"]
     syncTasksRepositoy = database["syncTasks"]
     syncLogsRepository = database["syncLogs"]
     stockModelRepository = database["stockModels"]
@@ -29,7 +30,7 @@ def create_container() -> dict:
     clearService = ClearService(syncTasksRepositoy, syncLogsRepository)
 
     stockService = StockService(companyMarketService, yFinanceService, stockModelService, database,
-                                stocksRepository, stockInfosRepository, syncTasksRepositoy, syncLogsRepository, stockModelRepository)
+                                stocksRepository, stockInfosRepository, stockPercentRepository, syncTasksRepositoy, syncLogsRepository, stockModelRepository)
 
     container = {
         "database": database,
