@@ -215,10 +215,10 @@ func (service *Service) SyncStocks() {
 func (service *Service) SyncStockHists() {
 	for {
 		logrus.Infoln("History sync started")
-		_, err := service.stockClient.SyncStockHistorie()
+		/* _, err := service.stockClient.SyncStockHistorie()
 		if err != nil {
 			logrus.Errorln("Hist sync failed:" + err.Error())
-		}
+		} */
 		logrus.Infoln("History sync finisched")
 
 		now := time.Now()

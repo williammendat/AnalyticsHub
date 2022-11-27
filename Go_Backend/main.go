@@ -6,16 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+	auth "github.com/williammendat/analytics-hub/Auth"
 	database "github.com/williammendat/analytics-hub/Database"
 	httpclient "github.com/williammendat/analytics-hub/HttpClient"
+	generalrouter "github.com/williammendat/analytics-hub/Router"
 	scheduler "github.com/williammendat/analytics-hub/Scheduler"
 	stock "github.com/williammendat/analytics-hub/Stock"
 	stockhist "github.com/williammendat/analytics-hub/StockHist"
 	stockinfo "github.com/williammendat/analytics-hub/StockInfo"
 	stockprediction "github.com/williammendat/analytics-hub/StockPrediction"
 	stockrankings "github.com/williammendat/analytics-hub/StockRankings"
-	generalrouter "github.com/williammendat/analytics-hub/Router"
-	_ "github.com/williammendat/analytics-hub/User"
+	user "github.com/williammendat/analytics-hub/User"
 )
 
 func main() {
@@ -41,6 +42,13 @@ func main() {
 
 	baseClient := httpclient.NewClient()
 
+	// User
+	userRepository := user.NewRepository(dataStore)
+	userService := user.NewService(userRepository)
+
+	// Auth
+	_ = auth.NewService(userService)
+
 	// Stock Ranking 
 	stockPercentRepository := stockrankings.NewRepository(dataStore)
 	stockRankingService := stockrankings.NewService(stockPercentRepository)
@@ -61,6 +69,7 @@ func main() {
 	stockHttpClient := stock.NewHttpClient(baseClient)
 	stockRepository := stock.NewRepository(dataStore)
 	stockService := stock.NewService(stockHttpClient, stockRepository, stockPredictionService, stockInfoService, stockRankingService, stockHistService)
+
 
 	// Scheduler
 	scheduler := scheduler.NewScheduler(
