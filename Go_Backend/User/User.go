@@ -4,7 +4,7 @@ type (
 	User struct {
 		UserBaseInfo `json:",inline" bson:",inline"`
 		Email             string   `json:"Email" bson:"email"`
-		Base64ProfilePic  string   `json:"Base64ProfilePic" bson:"base65profilepic"`
+		Base64ProfilePic  string   `json:"Base64ProfilePic" bson:"base64profilepic"`
 		Favorites         []string `json:"Favorites" bson:"favorites"`
 	}
 )
