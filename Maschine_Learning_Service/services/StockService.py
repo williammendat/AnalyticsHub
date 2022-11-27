@@ -314,7 +314,6 @@ class StockService:
             collection = self._histCollectPrefix + symbol
             repo = self._client[collection]
             last_two = list(repo.find(sort=[('Date', -1)]).limit(2))
-            print(last_two)
             if len(last_two) < 2:
                 return 0
             current = last_two[0]["Close"]

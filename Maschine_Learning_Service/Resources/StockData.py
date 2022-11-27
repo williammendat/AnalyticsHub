@@ -18,4 +18,4 @@ class StockData(Resource):
         if type == "full":
             withPrediction = True
         data = self._stockService.getStockData(symbol, withPrediction)
-        return json.dumps(data)
+        return data

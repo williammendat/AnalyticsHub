@@ -124,6 +124,7 @@ class YFinanceService:
         hist: pd.DataFrame = tickerInfo.history(
             period=period, interval=inteval)
         hist = hist.reset_index()
+        hist.dropna(inplace=True)
         return hist
 
     def GetTickerHistoryWithStartDate(self, ticker: str, start: str, inteval: str = "1d") -> pd.DataFrame:
@@ -170,7 +171,7 @@ class YFinanceService:
             "currentOpen": info["currentPrice"],
             "previousClose": info["previousClose"],
             "diff": diff,
-            "percent": percent
+            "diffPercent": percent
         }
 
         return data

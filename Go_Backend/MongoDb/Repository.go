@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"context"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -92,8 +91,6 @@ func (r *Repository[T, D]) FindMany(filter bson.M, opts ...*options.FindOptions)
 
 func (r *Repository[T, D]) InsertOne(doc D, opts ...*options.InsertOneOptions) (T, error){
 	doc.InitMongoID(primitive.NewObjectID())
-	doc.SetUpdatedAt(time.Now())
-	doc.SetCreatedAt(time.Now())
 
 	_, err := r.db.InsertOne(context.TODO(), doc, opts...)
 
@@ -106,8 +103,6 @@ func (r *Repository[T, D]) InsertMany(docs []D, opts ...*options.InsertManyOptio
 
 	for i, doc := range docs {
 		doc.InitMongoID(primitive.NewObjectID())
-		doc.SetUpdatedAt(time.Now())
-		doc.SetCreatedAt(time.Now())
 
 		newDocs[i] = doc
 		copyDocs[i] = doc.GetDoc()
@@ -136,7 +131,6 @@ func (r *Repository[T, D]) UpdateMany(filter bson.M, data primitive.M, opts ...*
 }
 
 func (r *Repository[T, D]) ReplaceOne(filter bson.M, doc D, opts ...*options.ReplaceOptions) (T, error) {
-	doc.SetUpdatedAt(time.Now())
 	_, err := r.db.ReplaceOne(context.TODO(), filter, doc, opts...)
 	return doc.GetDoc(), err
 }

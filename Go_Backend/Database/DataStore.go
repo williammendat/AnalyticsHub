@@ -53,9 +53,7 @@ func NewDataStore() (*DataStore, error) {
 
 	db := client.Database(mongoDbName)
 
-
-
-	store := &DataStore{
+	store := &DataStore{	
 		Client: client,
 		Database: db,
 		Ctx: ctx,
