@@ -64,11 +64,15 @@ func main() {
 	// Stock Hist
 	stockHistHttpClient := stockhist.NewHttpClient(baseClient)
 	stockHistService := stockhist.NewService(dataStore, stockHistHttpClient)
+	stockHistController := stockhist.NewController(stockHistService)
+	stockHistRouter := stockhist.NewRouter(stockHistController)
 
 	// Stock
 	stockHttpClient := stock.NewHttpClient(baseClient)
 	stockRepository := stock.NewRepository(dataStore)
 	stockService := stock.NewService(stockHttpClient, stockRepository, stockPredictionService, stockInfoService, stockRankingService, stockHistService)
+	stockController := stock.NewController(stockService)
+	stockRouter := stock.NewRouter(stockController)
 
 
 	// Scheduler
@@ -82,6 +86,8 @@ func main() {
 	go scheduler.StartTasksAsync()
 
 	router := gin.Default()
+	stockHistRouter.InitRouter(router)
+	stockRouter.InitRouter(router)
     
 	generalrouter.InitRouter(router)
 

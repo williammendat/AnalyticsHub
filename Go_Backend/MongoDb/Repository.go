@@ -46,6 +46,10 @@ type (
 		DeleteMany(filter bson.M, opts ...*options.DeleteOptions) (int, error)
 	}
 
+	CountDocuments interface {
+		CountDocuments(filter bson.M) (int64, error)
+	}
+
 	RepositoryI[T any, D Document[T]] interface {
 		FindOne[T]
 		FindMany[T]
@@ -56,6 +60,7 @@ type (
 		ReplaceOne[T, D]
 		DeleteOne
 		DeleteMany
+		CountDocuments
 	}
 
 	Repository[T any, D Document[T]] struct {
@@ -67,6 +72,10 @@ func NewRepository[T any, D Document[T]](collection *mongo.Collection) Repositor
 	return &Repository[T, D]{
 		db: collection,
 	}
+}
+
+func (r *Repository[T, D]) CountDocuments(filter bson.M) (int64, error) {
+	return r.db.CountDocuments(context.TODO(), filter)
 }
 
 func (r *Repository[T, D]) FindOne(filter bson.M, opts ...*options.FindOneOptions) (T, error) {

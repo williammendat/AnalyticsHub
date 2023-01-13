@@ -8,6 +8,10 @@ import (
 
 type (
 
+	StockFavorites struct {
+		Favorites []StockRankingData `bson:"favorites" json:"favorites"`
+	}
+
 	StockRankings struct {
 		TopRankings []StockRankingData `bson:"topRankings" json:"topRankings"`
 		BottomRankings []StockRankingData `bson:"bottomRankings" json:"bottomRankings"`

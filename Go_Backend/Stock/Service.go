@@ -1,10 +1,12 @@
 package stock
 
 import (
+	"math"
 	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	mongodb "github.com/williammendat/analytics-hub/MongoDb"
 	stockhist "github.com/williammendat/analytics-hub/StockHist"
 	stockinfo "github.com/williammendat/analytics-hub/StockInfo"
 	stockprediction "github.com/williammendat/analytics-hub/StockPrediction"
@@ -41,15 +43,75 @@ func NewService(
 	}
 }
 
-func (service *Service) GetStockModels() []StockModel {
+func (service *Service) GetSearchPageStockModels(searchTerm string, limit, page int64) PagedStockModels {
 	filter := bson.M{}
 
-	models, err := service.repository.FindMany(filter)
+	if searchTerm != "" {
+		filter = bson.M{"$or": []interface{}{
+			bson.M{"symbol": bson.M{"$regex": searchTerm, "$options": "im"}},
+			bson.M{"name": bson.M{"$regex": searchTerm, "$options": "im"}},
+		}}
+	}
+
+	count, err := service.repository.CountDocuments(filter)
 	if err != nil {
 		panic(err)
 	}
 
-	return models
+	models, err := service.repository.FindMany(filter, mongodb.GetPaginatedOpts(limit, page))
+	if err != nil {
+		panic(err)
+	}
+
+	result := PagedStockModels{
+		StockModels: models,
+		Count:       len(models),
+		Page:        int(page),
+		MaxPage:     int(math.Ceil(float64(count) / float64(limit))),
+	}
+
+	return result
+}
+
+func (service *Service) GetStockFavorites(favs []string, withHist bool) StockFavorites {
+	if len(favs) == 0 {
+		return StockFavorites{
+			Favorites: []StockRankingData{},
+		}
+	}
+
+	stockRankings := StockFavorites{
+		Favorites: make([]StockRankingData, len(favs)),
+	}
+
+	favsRankings := service.stockRankingService.GetFavouritesStockRankings(favs)
+
+	wgFavs := sync.WaitGroup{}
+
+	if len(favsRankings) != 0 {
+		for i, fav := range favsRankings {
+			wgFavs.Add(1)
+			go service.addStockRankingData(i, &wgFavs, fav, &stockRankings.Favorites)
+		}
+	}
+	wgFavs.Wait()
+
+	if !withHist {
+		return stockRankings
+	}
+
+	wgFavHist := sync.WaitGroup{}
+
+	for i, favRanking := range stockRankings.Favorites {
+		wgFavHist.Add(1)
+		go func(index int, stockData StockRankingData) {
+			stockRankings.Favorites[index].Hist = service.stockHistService.GetHistPeriod(stockData.Symbol, stockhist.FiveDay)
+			wgFavHist.Done()
+		}(i, favRanking)
+	}
+	wgFavHist.Wait()
+
+	return stockRankings
 }
 
 func (service *Service) GetStockRankings(withHist bool) StockRankings {
@@ -105,7 +167,7 @@ func (service *Service) GetStockRankings(withHist bool) StockRankings {
 
 	for i, topRanking := range stockRankings.TopRankings {
 		wgTopHist.Add(1)
-		go func(index int, stockData StockRankingData){
+		go func(index int, stockData StockRankingData) {
 			stockRankings.TopRankings[index].Hist = service.stockHistService.GetHistPeriod(stockData.Symbol, stockhist.FiveDay)
 			wgTopHist.Done()
 		}(i, topRanking)
@@ -115,7 +177,7 @@ func (service *Service) GetStockRankings(withHist bool) StockRankings {
 
 	for i, bottomRanking := range stockRankings.BottomRankings {
 		wgBottomHist.Add(1)
-		go func(index int, stockData StockRankingData){
+		go func(index int, stockData StockRankingData) {
 			stockRankings.BottomRankings[index].Hist = service.stockHistService.GetHistPeriod(stockData.Symbol, stockhist.FiveDay)
 			wgBottomHist.Done()
 		}(i, bottomRanking)
@@ -127,7 +189,6 @@ func (service *Service) GetStockRankings(withHist bool) StockRankings {
 	return stockRankings
 }
 
-
 func (service *Service) addStockRankingData(index int, wg *sync.WaitGroup, ranking stockrankings.StockRanking, rankings *[]StockRankingData) {
 	stockData := service.GetStockData(ranking.Symbol)
 
@@ -136,7 +197,7 @@ func (service *Service) addStockRankingData(index int, wg *sync.WaitGroup, ranki
 		Percent:   ranking.Percent,
 		StockData: stockData,
 		Hist: stockhist.StockHist{
-			Dates: make([]string, 0),
+			Dates:  make([]string, 0),
 			Values: make([]float64, 0),
 		},
 	}
@@ -265,4 +326,3 @@ func (service *Service) ClearSyncTask() {
 		logrus.Infoln("clear finisched")
 	}
 }
-

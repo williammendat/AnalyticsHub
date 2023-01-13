@@ -46,7 +46,8 @@ class YFinanceService:
             stock = {
                 "_id": bson.ObjectId(),
                 "symbol": info["symbol"],
-                "name": info["name"]
+                "name": info["name"],
+                "logo_url": info["logo_url"]
             }
 
             stock_info = {

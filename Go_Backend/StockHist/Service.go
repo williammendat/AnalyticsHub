@@ -79,27 +79,15 @@ func (service *Service) FiveDayHist(symbol string) StockHist {
 }
 
 func (service *Service) OneMonthHist(symbol string) StockHist {
-	stockHist, err := service.client.GetStockHistorie(symbol, OneMonth, "1d")
-	if err != nil {
-		panic(err)
-	}
-	return stockHist
+	return service.getHistFromMonth(1, symbol)
 }
 
 func (service *Service) ThreeMonthHist(symbol string) StockHist {
-	stockHist, err := service.client.GetStockHistorie(symbol, ThreeMonth, "1d")
-	if err != nil {
-		panic(err)
-	}
-	return stockHist
+	return service.getHistFromMonth(3, symbol)
 }
 
 func (service *Service) SixMonthHist(symbol string) StockHist {
-	stockHist, err := service.client.GetStockHistorie(symbol, SixMonth, "5d")
-	if err != nil {
-		panic(err)
-	}
-	return stockHist
+	return service.getHistFromMonth(6, symbol)
 }
 
 func (service *Service) OneYearHist(symbol string) StockHist {
@@ -121,6 +109,18 @@ func (service *Service) TenYearHist(symbol string) StockHist {
 func (service *Service) getHistFromYear(year int, symbol string) StockHist {
 	now := time.Now()
 	startDate := now.AddDate(-year, 0, 0)
+
+	filter := bson.M{
+		"Date": bson.M{
+			"$gte": startDate,
+		},
+	}
+	return service.getHist(filter, symbol)
+}
+
+func (service *Service) getHistFromMonth(month int, symbol string) StockHist {
+	now := time.Now()
+	startDate := now.AddDate(0, -month, 0)
 
 	filter := bson.M{
 		"Date": bson.M{
