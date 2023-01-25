@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -86,6 +87,14 @@ func main() {
 	go scheduler.StartTasksAsync()
 
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+        AllowOrigins:     []string{"*"},
+        AllowMethods:     []string{"POST, OPTIONS, GET, PUT", "DELETE"},
+        AllowHeaders:     []string{"Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With"},
+        AllowCredentials: true,
+    }))
+
 	stockHistRouter.InitRouter(router)
 	stockRouter.InitRouter(router)
     
