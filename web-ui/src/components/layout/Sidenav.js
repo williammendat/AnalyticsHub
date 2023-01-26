@@ -11,7 +11,7 @@
 */
 
 // import { useState } from "react";
-import { Menu, Button } from "antd";
+import { Menu } from "antd";
 import { NavLink, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 
@@ -71,7 +71,7 @@ function Sidenav({ color }) {
             <span
               className="icon"
               style={{
-                background: page === "dashboard" ? color : "",
+                background: page === "" ? color : "",
               }}
             >
               {dashboard}

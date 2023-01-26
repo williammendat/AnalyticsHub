@@ -9,14 +9,14 @@
 =========================================================
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Stocks from "./pages/Stocks";
 import StockOverview from "./pages/StockOverview";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import Main from "./components/layout/Main";
-import "antd/dist/antd.css";
+import "antd/dist/antd.min.css";
 import "./assets/styles/main.css";
 import "./assets/styles/responsive.css";
 

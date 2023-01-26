@@ -164,13 +164,14 @@ class YFinanceService:
 
     def GetFinancialData(self, ticker: str) -> dict:
         tickerInfo = yf.Ticker(ticker)
-        info = tickerInfo.info
-        diff = round(info["currentPrice"] - info["previousClose"], 2)
-        percent = round((diff / info["previousClose"]) * 100, 2)
+        info = tickerInfo.basic_info
+
+        diff = round(info["open"] - info["previous_close"], 2)
+        percent = round((diff / info["previous_close"]) * 100, 2)
 
         data = {
-            "currentOpen": info["currentPrice"],
-            "previousClose": info["previousClose"],
+            "currentOpen": info["open"],
+            "previousClose": info["previous_close"],
             "diff": diff,
             "diffPercent": percent
         }

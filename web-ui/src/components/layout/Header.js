@@ -15,26 +15,12 @@ import { useState, useEffect } from "react";
 import {
   Row,
   Col,
-  Breadcrumb,
-  Badge,
-  Dropdown,
-  Button,
   List,
   Avatar,
-  Input,
-  Drawer,
   Typography,
-  Switch,
 } from "antd";
 
-import {
-  SearchOutlined,
-  StarOutlined,
-  TwitterOutlined,
-  FacebookFilled,
-} from "@ant-design/icons";
-
-import { NavLink, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import avtar from "../../assets/images/team-2.jpg";
 
