@@ -1,26 +1,26 @@
 .parent {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(10, 1fr);
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(12, 1fr);
   grid-column-gap: 0px;
   grid-row-gap: 0px;
 }
 
 .div1 {
-  grid-area: 1 / 1 / 2 / 3;
+  grid-area: 1 / 1 / 2 / 5;
 }
 .div2 {
-  grid-area: 2 / 1 / 4 / 8;
+  grid-area: 2 / 1 / 6 / 13;
 }
 .div3 {
-  grid-area: 4 / 1 / 8 / 11;
+  grid-area: 5 / 1 / 10 / 4;
 }
 .div4 {
-  grid-area: 8 / 1 / 11 / 3;
+  grid-area: 5 / 3 / 10 / 6;
 }
 .div5 {
-  grid-area: 8 / 3 / 11 / 6;
+  grid-area: 5 / 7 / 10 / 13;
 }
 .div6 {
-  grid-area: 8 / 7 / 11 / 11;
+  grid-area: 7 / 1 / 13 / 13;
 }

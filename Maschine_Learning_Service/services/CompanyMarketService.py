@@ -39,6 +39,8 @@ class CompanyMarketService:
                 companyNames = tr.find_all("div", {"class": "company-name"})
                 if len(companyNames) == 0:
                     continue
+
+                
     
                 companySymbols = tr.find_all("div", {"class": "company-code"})
                 if len(companySymbols) == 0:
